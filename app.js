@@ -8,12 +8,13 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { limiter } = require('./middlewares/request-limiter');
 const NotFoundErr = require('./errors/not-found-err');
 const BadRequestErr = require('./errors/bad-request-err');
-const userRouter = require('./routes/users');
-const movieRouter = require('./routes/movies');
+const router = require('./routes/index');
 const { errorHandler } = require('./middlewares/error-handler');
+const auth = require('./middlewares/auth');
 const { ValidationMessage, PageNotFoundMessage } = require('./utils/constants');
+require('dotenv').config();
 
-const { MONGO_URL, PORT } = process.env;
+const { MONGO_URL, PORT = 3000 } = process.env;
 
 const app = express();
 
@@ -24,12 +25,11 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect(MONGO_URL || 'mongodb://127.0.0.1:27017/bitfilmsdb');
+mongoose.connect(MONGO_URL);
 
-app.use('/', userRouter);
-app.use('/', movieRouter);
+app.use('/', router);
 
-app.use((req, res, next) => {
+app.use(auth, (req, res, next) => {
   next(new NotFoundErr(PageNotFoundMessage));
 });
 
@@ -47,4 +47,4 @@ app.use(errors());
 
 app.use(errorHandler);
 
-app.listen(PORT || 3000);
+app.listen(PORT);

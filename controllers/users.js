@@ -6,6 +6,7 @@ const ConflictErr = require('../errors/conflict-err');
 const {
   LogoutMessage, LoginMessage, UserNotFoundMessage, ConflictMessage,
 } = require('../utils/constants');
+require('dotenv').config();
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -60,12 +61,12 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       res.cookie('jwt', token, { maxAge: 604800000, httpOnly: true, sameSite: true });
-      res.status(200).send({ message: LogoutMessage });
+      res.status(200).send({ message: LoginMessage });
     })
     .catch(next);
 };
 
 module.exports.logout = (req, res) => {
   res.clearCookie('jwt', { httpOnly: true, sameSite: true });
-  res.status(200).send({ message: LoginMessage });
+  res.status(200).send({ message: LogoutMessage });
 };
