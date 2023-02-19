@@ -1,6 +1,7 @@
 const Movie = require('../models/movie');
 const NotFoundErr = require('../errors/not-found-err');
 const ForbiddenErr = require('../errors/forbidden-err');
+const { ForbiddenMessage, MovieNotFoundMessage, DeleteMessage } = require('../utils/constants');
 
 const formatMovieResponse = (movie) => ({
   country: movie.country,
@@ -62,13 +63,13 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .then(async (movie) => {
       if (!movie) {
-        throw new NotFoundErr('Movie not found');
+        throw new NotFoundErr(MovieNotFoundMessage);
       }
       if (movie.owner._id.toHexString() === req.user._id) {
         await Movie.findByIdAndRemove(req.params.movieId);
-        res.send({ message: 'Movie deleted successfully' });
+        res.send({ message: DeleteMessage });
       }
-      throw new ForbiddenErr("It is forbidden to delete other people's movies");
+      throw new ForbiddenErr(ForbiddenMessage);
     })
     .catch(next);
 };

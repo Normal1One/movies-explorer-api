@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundErr = require('../errors/not-found-err');
 const ConflictErr = require('../errors/conflict-err');
+const {
+  LogoutMessage, LoginMessage, UserNotFoundMessage, ConflictMessage,
+} = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -15,7 +18,7 @@ module.exports.getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundErr('User not found');
+        throw new NotFoundErr(UserNotFoundMessage);
       } else {
         res.send(formatUserResponse(user));
       }
@@ -31,7 +34,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.send(formatUserResponse(user)))
     .catch((e) => {
       if (e.code === 11000) {
-        next(new ConflictErr('User with this email already exists'));
+        next(new ConflictErr(ConflictMessage));
       } else {
         next(e);
       }
@@ -42,7 +45,7 @@ module.exports.changeUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, req.body, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundErr('User not found');
+        throw new NotFoundErr(UserNotFoundMessage);
       } else {
         res.send(formatUserResponse(user));
       }
@@ -57,7 +60,12 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       res.cookie('jwt', token, { maxAge: 604800000, httpOnly: true, sameSite: true });
-      res.status(200).send({ jwt: token });
+      res.status(200).send({ message: LogoutMessage });
     })
     .catch(next);
+};
+
+module.exports.logout = (req, res) => {
+  res.clearCookie('jwt', { httpOnly: true, sameSite: true });
+  res.status(200).send({ message: LoginMessage });
 };

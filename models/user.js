@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const UnauthorizedErr = require('../errors/unauthorized-err');
+const { InvalidMessage, EmailMessage } = require('../utils/constants');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -10,7 +11,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (value) => validator.isEmail(value),
-      message: 'Email does not exist',
+      message: EmailMessage,
     },
   },
   password: {
@@ -30,13 +31,13 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UnauthorizedErr('Invalid email or password'));
+        return Promise.reject(new UnauthorizedErr(InvalidMessage));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new UnauthorizedErr('Invalid email or password'));
+            return Promise.reject(new UnauthorizedErr(InvalidMessage));
           }
 
           return user;

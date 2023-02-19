@@ -2,23 +2,20 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { errors, isCelebrateError } = require('celebrate');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { limiter } = require('./middlewares/request-limiter');
 const NotFoundErr = require('./errors/not-found-err');
 const BadRequestErr = require('./errors/bad-request-err');
 const userRouter = require('./routes/users');
 const movieRouter = require('./routes/movies');
+const { errorHandler } = require('./middlewares/error-handler');
+const { ValidationMessage, PageNotFoundMessage } = require('./utils/constants');
 
 const { MONGO_URL, PORT } = process.env;
 
 const app = express();
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-});
 
 app.use(requestLogger);
 app.use(limiter);
@@ -33,30 +30,21 @@ app.use('/', userRouter);
 app.use('/', movieRouter);
 
 app.use((req, res, next) => {
-  next(new NotFoundErr('Page not found'));
+  next(new NotFoundErr(PageNotFoundMessage));
 });
 
 app.use(errorLogger);
 
 app.use((err, req, res, next) => {
-  if (!isCelebrateError(err)) {
-    next(err);
+  if (isCelebrateError(err) || '_message' in err) {
+    next(new BadRequestErr(ValidationMessage));
   } else {
-    next(new BadRequestErr('Validation failed'));
+    next(err);
   }
 });
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({
-    message: statusCode === 500
-      ? 'Internal server error'
-      : message,
-  });
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT || 3000);

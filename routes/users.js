@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const {
-  getUser, changeUser, createUser, login,
+  getUser, changeUser, createUser, login, logout,
 } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 
@@ -14,10 +14,7 @@ router.patch('/users/me', auth, celebrate({
   }),
 }), changeUser);
 
-router.get('/signout', auth, (req, res) => {
-  res.clearCookie('jwt', { httpOnly: true, sameSite: true });
-  res.status(200).send({ message: 'You have succesfully logged out' });
-});
+router.get('/signout', auth, logout);
 
 router.post('/signin', celebrate({
   body: Joi.object().keys({
