@@ -51,7 +51,13 @@ module.exports.changeUser = (req, res, next) => {
         res.send(formatUserResponse(user));
       }
     })
-    .catch(next);
+    .catch((e) => {
+      if (e.code === 11000) {
+        next(new ConflictErr(ConflictMessage));
+      } else {
+        next(e);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {

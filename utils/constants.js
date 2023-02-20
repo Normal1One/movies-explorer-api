@@ -12,6 +12,8 @@ const MovieNotFoundMessage = 'Movie not found';
 
 const PageNotFoundMessage = 'Page not found';
 
+const InternalServerErrorMessage = 'Internal server error';
+
 const LoginMessage = 'You have succesfully logged in';
 
 const LogoutMessage = 'You have succesfully logged out';
@@ -32,6 +34,7 @@ module.exports = {
   UserNotFoundMessage,
   MovieNotFoundMessage,
   PageNotFoundMessage,
+  InternalServerErrorMessage,
   LoginMessage,
   LogoutMessage,
   InvalidMessage,
