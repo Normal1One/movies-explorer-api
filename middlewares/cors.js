@@ -1,4 +1,6 @@
 const allowedCors = [
+  'https://diploma.nikitalavrov.nomoredomains.work',
+  'http://diploma.nikitalavrov.nomoredomains.work',
   'http://localhost:3000',
 ];
 
