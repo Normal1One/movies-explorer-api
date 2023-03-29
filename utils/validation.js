@@ -18,7 +18,7 @@ module.exports.createMovieValidate = celebrate({
 
 module.exports.deleteMovieValidate = celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().hex().length(24),
+    movieId: Joi.number().positive().integer(),
   }),
 });
 

@@ -18,13 +18,13 @@ module.exports.createMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  Movie.findById(req.params.movieId)
+  Movie.findOne({ movieId: req.params.movieId, owner: req.user._id })
     .then((movie) => {
       if (!movie) {
         throw new NotFoundErr(MovieNotFoundMessage);
       }
-      if (movie.owner._id.toHexString() === req.user._id) {
-        return Movie.findByIdAndRemove(req.params.movieId)
+      if (movie.owner.toHexString() === req.user._id) {
+        return Movie.findOneAndRemove({ movieId: req.params.movieId, owner: req.user._id })
           .then(() => {
             res.send({ message: DeleteMessage });
           });
