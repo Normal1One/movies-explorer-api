@@ -11,9 +11,7 @@ const router = require('./routes/index');
 const { errorHandler } = require('./middlewares/error-handler');
 const { ValidationMessage } = require('./utils/constants');
 const { cors } = require('./middlewares/cors');
-require('dotenv').config();
-
-const { MONGO_URL = 'mongodb://127.0.0.1:27017/bitfilmsdb', PORT = 3000 } = process.env;
+const { MONGO_URL, PORT } = require('./utils/config');
 
 const app = express();
 
